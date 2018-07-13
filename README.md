@@ -9,15 +9,35 @@ homework was a good chance to try something new.
 
 
 ## Layout
-/data - csv files
-/ - basic python packaging and installation files
-/homework - main package for doing homework
-/test - basic tests
+* /data - csv files
+* / - basic python packaging and installation files
+* /homework - main package for doing homework
+* /test - basic tests
+* /output - two csvs with results
+
 
 
 ## Setup
 
 This code was developed to use python 3.7+
+
+```bash
+dnf install python
+python --version
+
+```
+
+```bash
+python setup.py install
+pip install -r requirements.txt
+
+```
+
+```bash
+cd homework
+python tatari.py
+
+```
 
 
 ## Assumptions
@@ -34,4 +54,7 @@ for foreign clients or data sources
 * Views I am assuming are like imps, clicks, conversions etc... in ad tech so they are whole numbers, I typically treat them as longs
 
 * There is overlap in Rotations, assumed that means they should be counted in both for that grouping
+
+* Rotations since they overlap seems like it should be pro-rated in the last CPV by rotation by date. Didn't dive into this.
+
 

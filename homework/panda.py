@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def calc_div_group(group, numerator, denominator):
@@ -9,9 +10,10 @@ def calc_div_group(group, numerator, denominator):
     :param denominator:
     :return: float round(2)
     """
+    np.seterr(divide='raise')  # This came out in testing. Not sure if it's needed for production
     try:
         value = round(float(group[numerator].sum() / group[denominator].sum()), 2)
-    except ZeroDivisionError:
+    except FloatingPointError:
         value = 0
     return value
 
@@ -24,7 +26,7 @@ def cpv_creatives(spots):
     """
     df = pd.DataFrame([[s.creative, s.date, s.rotation, s.spend, s.time, s.views, s] for s in spots],
                       columns=['creative', 'date', 'rotation', 'spend', 'time', 'views', 'spot'])
-    results = df.groupby('creative').apply(lambda x: calc_div_group(x, "spend", "views"))
+    results = df.groupby('creative').apply(lambda x: calc_div_group(x, "spend", "views")).reset_index(name='CPV')
     return results
 
 
@@ -37,16 +39,21 @@ def cpv_rotations_days(spots):
     df = pd.DataFrame([[s.creative, s.date, s.rotation, s.spend, s.time, s.views, s] for s in spots],
                       columns=['creative', 'date', 'rotation', 'spend', 'time', 'views', 'spot'])
     real = un_nest(df, 'rotation')
-    results = real.groupby(['date', 'rotation']).apply(lambda x: calc_div_group(x, "spend", "views"))
+    results = real.groupby(['date', 'rotation']).apply(lambda x: calc_div_group(x, "spend", "views")) \
+        .reset_index(name='CPV')
     return results
 
 
 def un_nest(df, col, reset_index=False):
     """
-    This took a while to do, if I have a nested column I need to expand it
+    This took a while to do, if I have a list column I need to expand it
     borrowed a few lines from stack exchange as I am not 100% savvy with py pandas
+    Spot() -> rotations = [] e.g. ACH001, 1234, 1234, [Morning, Evening]
+    ACH001, 1234, 1234, Morning
+    ACH001, 1234, 1234, Evening
+    This should be prorated I would think but for simplicity just clone
     :param df: data frame
-    :param col: column that needs unnested
+    :param col: list column that needs unnested like $unwind in mongo
     :param reset_index: reset index in dataframe
     :return:
     """

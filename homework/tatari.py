@@ -64,13 +64,19 @@ def main():
 
     logger.info("Populating Rotations")
     rotations = populate_rotations(rotations_csv)
+
     logger.info("Populating Spots")
     spots = populate_spots(spots_csv, rotations)
-    logger.info("Populating Spots")
+
+    logger.info("CPV by Creatives")
     cpv = cpv_creatives(spots)
-    cpv.to_csv("cpv_by_creative.csv")
+    # IO_CSV is probably not needed with this, could be better
+    cpv.columns = ['Creative', 'CPV']
+    cpv.to_csv(BASE_PATH + "/output/cpv_by_creative.csv", header=True, index=False)
+
+    logger.info("CPV by Date By Rotation")
     cpv_rotations = cpv_rotations_days(spots)
-    cpv_rotations.to_csv("cpv_by_date_rotation.csv")
+    cpv_rotations.to_csv(BASE_PATH + "/output/cpv_by_date_rotation.csv", header=True, index=False)
 
 
 if __name__ == "__main__":
